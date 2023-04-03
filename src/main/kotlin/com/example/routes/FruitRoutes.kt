@@ -8,7 +8,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Route.fruitRoute() {
+fun Route.fruitRoutes() {
     // create a mutable list of fruits
     val fruits = mutableListOf(
         Fruit("apple", "1"),
@@ -35,7 +35,7 @@ fun Route.fruitRoute() {
 
             // acknowledge that we successfully added the fruit by responding
             call.respond(
-                HttpStatusCode.OK, SimpleResponse(
+                HttpStatusCode.Created, SimpleResponse(
                     true,
                     "Successfully added ${newFruit.name}"
                 )
