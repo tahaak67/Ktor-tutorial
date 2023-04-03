@@ -7,6 +7,12 @@ import org.bson.types.ObjectId
 @Serializable
 data class Fruit(
     val name: String,
+    val season: Season = Season.Unknown,
+    val countries: List<String> = emptyList(),
     @BsonId
     val id: String = ObjectId().toString()
-)
+){
+    enum class Season {
+        Spring, Winter, Summer, Autumn, Unknown
+    }
+}

@@ -1,1 +1,1 @@
-[Ktor server for beginners - MongoDB (Part 1 - CRUD)](https://tahaben.com.ly/2023/03/ktor-server-basics-saving-data-using-mongodb/)
+[Ktor server for beginners - MongoDB (Part 2 - Queries)](https://tahaben.com.ly/2023/04/ktor-server-for-beginners-mongodb-part-2-queries/)

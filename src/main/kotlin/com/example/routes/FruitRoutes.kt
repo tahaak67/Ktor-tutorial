@@ -1,6 +1,9 @@
 package com.example.routes
 
-import com.example.data.db.*
+import com.example.data.db.addFruit
+import com.example.data.db.deleteFruit
+import com.example.data.db.getFruits
+import com.example.data.db.updateFruit
 import com.example.data.model.Fruit
 import com.example.data.model.SimpleResponse
 import io.ktor.http.*
@@ -11,9 +14,61 @@ import io.ktor.server.routing.*
 
 fun Route.fruitRoute() {
 
-    get("/fruits/{id?}") {
+    get("/fruits/{sort_by?}/{sort_direction?}/{season[]?}/{country[]?}/{query?}") {
+        // read the sort_by from the parameters and assign it to sortBy variable
+        val sortBy = when (call.parameters["sort_by"] ?: "name") {
+            "name" -> Fruit::name
+            "id" -> Fruit::id
+            // if the parameter sent by client does not match any values from our model return a bad request
+            else -> return@get call.respond(
+                HttpStatusCode.BadRequest,
+                SimpleResponse(success = false, message = "invalid parameter for sort_by")
+            )
+        }
+
+        val sortDirection = when (call.parameters["sort_direction"] ?: "asc") {
+            "dec" -> -1
+            "asc" -> 1
+            else -> return@get call.respond(
+                HttpStatusCode.BadRequest,
+                SimpleResponse(success = false, message = "invalid parameter for sort_direction")
+            )
+        }
+        val seasons = mutableListOf<Fruit.Season>()
+        call.parameters.getAll("season")?.forEach { name ->
+            println("item name: $name")
+            // add an item to the list of seasons
+            seasons.add(
+                when (name) {
+                    "summer" -> Fruit.Season.Summer
+                    "winter" -> Fruit.Season.Winter
+                    "autumn" -> Fruit.Season.Autumn
+                    "spring" -> Fruit.Season.Spring
+                    else -> return@get call.respond(
+                        HttpStatusCode.BadRequest,
+                        SimpleResponse(success = false, message = "invalid parameter $name for season")
+                    )
+                }
+            )
+        }
+
+        // list of countries
+        val countries = call.parameters.getAll("country")
+
+        // search query
+        val query = call.parameters["query"]
+
         // get fruits from the database
-        call.respond(HttpStatusCode.OK, getFruits())
+        call.respond(
+            HttpStatusCode.OK,
+            getFruits(
+                sortField = sortBy,
+                sortDirection = sortDirection,
+                seasons = seasons,
+                countries = countries,
+                query = query
+            )
+        )
     }
     post("/add-fruit") {
         try {
