@@ -10,7 +10,8 @@ data class Fruit(
     val season: Season = Season.Unknown,
     val countries: List<String> = emptyList(),
     @BsonId
-    val id: String = ObjectId().toString()
+    val id: String = ObjectId().toString(),
+    val image: String?
 ){
     enum class Season {
         Spring, Winter, Summer, Autumn, Unknown
