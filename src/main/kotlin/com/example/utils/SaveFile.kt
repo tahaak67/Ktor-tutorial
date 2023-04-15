@@ -13,6 +13,11 @@ fun PartData.FileItem.save(path: String): String {
     val fileName = UUID.randomUUID().toString() + "." + fileExtension
     // create our new file in the server
     val folder = File(path)
+    // create parent directory if not exits
+    if (!folder.parentFile.exists()) {
+        folder.parentFile.mkdirs()
+    }
+    // continue with creating our new file
     folder.mkdir()
     // write bytes to our newly created file
     File("$path$fileName").writeBytes(fileBytes)
