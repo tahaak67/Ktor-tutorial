@@ -2,6 +2,7 @@ package com.example.plugins
 
 import com.example.routes.fruitRoute
 import com.example.routes.simpleRoute
+import com.example.routes.userRoute
 import com.example.utils.Constants
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
@@ -28,6 +29,7 @@ fun Application.configureRouting() {
                 files(Constants.FRUIT_IMAGE_DIRECTORY)
             }
         }
+        userRoute()
     }
 
 

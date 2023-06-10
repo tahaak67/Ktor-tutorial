@@ -1,10 +1,13 @@
 package com.example.data.db
 
 import com.example.data.model.Fruit
+import com.example.data.model.User
+import com.example.security.checkHashForPassword
 import com.mongodb.client.model.Filters.regex
 import org.litote.kmongo.EMPTY_BSON
 import org.litote.kmongo.and
 import org.litote.kmongo.coroutine.coroutine
+import org.litote.kmongo.eq
 import org.litote.kmongo.`in`
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.PatternUtil
@@ -13,6 +16,7 @@ import kotlin.reflect.KProperty1
 
 val db = KMongo.createClient().coroutine.getDatabase("tahaben_db")
 val fruits = db.getCollection<Fruit>()
+val users = db.getCollection<User>()
 
 suspend fun addFruit(newFruit: Fruit): Boolean {
     return try {
@@ -63,4 +67,23 @@ suspend fun updateFruit(updatedFruit: Fruit): Boolean {
         ex.printStackTrace()
         false
     }
+}
+
+suspend fun addUser(user: User): Boolean {
+    return try {
+        users.insertOne(user).wasAcknowledged()
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+        false
+    }
+}
+
+suspend fun checkIfUserExists(username: String): Boolean {
+    return users.findOne(User::username eq username) != null
+}
+
+suspend fun checkUsernameForPassword(username: String, passwordToCheck: String): Boolean {
+    // return false if we can't find the username in our db
+    val actualPassword = users.findOne(User::username eq username)?.password ?: return false
+    return checkHashForPassword(passwordToCheck, actualPassword)
 }

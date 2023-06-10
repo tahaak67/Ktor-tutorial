@@ -33,4 +33,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("org.litote.kmongo:kmongo:4.8.0")
     implementation("org.litote.kmongo:kmongo-coroutine:4.8.0")
+    implementation("io.ktor:ktor-server-auth:$ktor_version")
+    implementation("commons-codec:commons-codec:1.15")
 }

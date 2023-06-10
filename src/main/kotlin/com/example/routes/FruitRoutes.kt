@@ -11,6 +11,7 @@ import com.example.utils.save
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -74,73 +75,79 @@ fun Route.fruitRoute() {
             )
         )
     }
-    post("/add-fruit") {
-        try {
-
-            // receive multipart data from the client
-            val multipart = call.receiveMultipart()
-
-            // define variable to hold our parameters data
-            var fileName: String? = null
-            var name: String? = null
-            var season: String? = null
-            val countries: MutableList<String> = mutableListOf()
-            var imageUrl: String? = null
-
+    authenticate {
+        post("/add-fruit") {
             try {
-                // loop through each part of our multipart
-                multipart.forEachPart { partData ->
-                    when (partData) {
-                        is PartData.FormItem -> {
-                            // to read parameters that we sent with the image
-                            when (partData.name) {
-                                "name" -> name = partData.value
-                                "season" -> season = partData.value
-                                "countries" -> countries.add(partData.value)
-                            }
-                        }
 
-                        is PartData.FileItem -> {
-                            // to read the image data we call the 'save' utility function passing our path
-                            if (partData.name == "image") {
-                                fileName = partData.save(Constants.FRUIT_IMAGE_PATH)
-                                imageUrl = "${Constants.BASE_URL}${Constants.EXTERNAL_FRUIT_IMAGE_PATH}/$fileName"
-                            }
-                        }
+                // get the username for the authenticated user
+                val username = call.principal<UserIdPrincipal>()?.name ?: throw Exception("Can't get username")
 
-                        else -> Unit
+                // receive multipart data from the client
+                val multipart = call.receiveMultipart()
+
+                // define variable to hold our parameters data
+                var fileName: String? = null
+                var name: String? = null
+                var season: String? = null
+                val countries: MutableList<String> = mutableListOf()
+                var imageUrl: String? = null
+
+                try {
+                    // loop through each part of our multipart
+                    multipart.forEachPart { partData ->
+                        when (partData) {
+                            is PartData.FormItem -> {
+                                // to read parameters that we sent with the image
+                                when (partData.name) {
+                                    "name" -> name = partData.value
+                                    "season" -> season = partData.value
+                                    "countries" -> countries.add(partData.value)
+                                }
+                            }
+
+                            is PartData.FileItem -> {
+                                // to read the image data we call the 'save' utility function passing our path
+                                if (partData.name == "image") {
+                                    fileName = partData.save(Constants.FRUIT_IMAGE_PATH)
+                                    imageUrl = "${Constants.BASE_URL}${Constants.EXTERNAL_FRUIT_IMAGE_PATH}/$fileName"
+                                }
+                            }
+
+                            else -> Unit
+                        }
                     }
+                } catch (ex: Exception) {
+                    // something went wrong with the image part, delete the file
+                    File("${Constants.FRUIT_IMAGE_PATH}/$fileName").delete()
+                    ex.printStackTrace()
+                    call.respond(HttpStatusCode.InternalServerError, "Error")
                 }
-            } catch (ex: Exception) {
-                // something went wrong with the image part, delete the file
-                File("${Constants.FRUIT_IMAGE_PATH}/$fileName").delete()
-                ex.printStackTrace()
-                call.respond(HttpStatusCode.InternalServerError, "Error")
-            }
-            // create a new fruit object using data we collected above
-            val newFruit = Fruit(
-                name = name!!,
-                // the valueOf function will find the enum class type that matches this string and return it, an Exception is thrown if the string does not match any type
-                season = Fruit.Season.valueOf(season!!),
-                countries = countries,
-                image = imageUrl
-            )
-            // add the received fruit to the database
-            if (!addFruit(newFruit)) {
-                // if not added successfully return with an error
-                return@post call.respond(
-                    HttpStatusCode.Conflict,
-                    SimpleResponse(success = false, message = "Item already exits")
+                // create a new fruit object using data we collected above
+                val newFruit = Fruit(
+                    name = name!!,
+                    // the valueOf function will find the enum class type that matches this string and return it, an Exception is thrown if the string does not match any type
+                    season = Fruit.Season.valueOf(season!!),
+                    countries = countries,
+                    image = imageUrl,
+                    addedBy = username
                 )
+                // add the received fruit to the database
+                if (!addFruit(newFruit)) {
+                    // if not added successfully return with an error
+                    return@post call.respond(
+                        HttpStatusCode.Conflict,
+                        SimpleResponse(success = false, message = "Item already exits")
+                    )
+                }
+
+                // acknowledge that we successfully added the fruit by responding
+                call.respond(HttpStatusCode.Created, newFruit)
+            } catch (ex: Exception) {
+
+                call.respond(HttpStatusCode.BadRequest, SimpleResponse(false, "Invalid data"))
             }
 
-            // acknowledge that we successfully added the fruit by responding
-            call.respond(HttpStatusCode.Created, newFruit)
-        } catch (ex: Exception) {
-
-            call.respond(HttpStatusCode.BadRequest, SimpleResponse(false, "Invalid data"))
         }
-
     }
 
     patch("/add-fruit") {
