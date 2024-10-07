@@ -1,12 +1,13 @@
 package com.example.utils
 
 import io.ktor.http.content.*
+import io.ktor.utils.io.jvm.javaio.*
 import java.io.File
 import java.util.*
 
 fun PartData.FileItem.save(path: String): String {
     // read the file bytes
-    val fileBytes = streamProvider().readBytes()
+    val fileBytes = provider().toInputStream().readBytes()
     // find the file extension eg: .jpg
     val fileExtension = originalFileName?.takeLastWhile { it != '.' }
     // generate a random name for the new file and append the file extension

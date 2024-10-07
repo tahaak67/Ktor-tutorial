@@ -10,7 +10,7 @@ data class Fruit(
     val name: String,
     val season: Season = Season.Unknown,
     val countries: List<String> = emptyList(),
-    @BsonId
+    @SerialName("_id")
     val id: String = ObjectId().toString(),
     val image: String?,
     @SerialName("added_by")
