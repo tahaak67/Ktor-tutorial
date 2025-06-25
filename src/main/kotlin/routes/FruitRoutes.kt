@@ -53,15 +53,13 @@ fun Route.fruitRoutes() {
 
         val q = call.queryParameters["q"]
         val limit = call.queryParameters["limit"]?.toIntOrNull() ?: 10
-        val page = call.queryParameters["page"]?.toIntOrNull() ?: 1
 
         val fruits = getFruits(
             sortingField = sortingField,
             sortingDirection = sortingDirection,
             season = seasons,
             query = q,
-            limit = limit,
-            page = page
+            limit = limit
         )
 
 

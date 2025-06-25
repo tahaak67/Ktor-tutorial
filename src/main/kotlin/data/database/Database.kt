@@ -3,15 +3,12 @@ package ly.com.tahaben.data.database
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Sorts
 import com.mongodb.kotlin.client.coroutine.MongoClient
-import io.netty.channel.unix.Limits
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import ly.com.tahaben.data.model.Fruit
-import ly.com.tahaben.data.model.FruitPage
 import ly.com.tahaben.data.model.Season
 import ly.com.tahaben.data.model.User
 import ly.com.tahaben.utils.checkHashForPassword
-import kotlin.math.ceil
 
 
 val client = MongoClient.create("mongodb://localhost:27017")
@@ -33,25 +30,15 @@ suspend fun getFruits(
      sortingDirection: Int = 1,
      season: List<Season>? = null,
      query: String? = null,
-     limit: Int = 10,
-     page: Int = 1
-): FruitPage {
+     limit: Int = 10
+): List<Fruit> {
     val sorting = if (sortingDirection > 0) Sorts.ascending(sortingField) else Sorts.descending(sortingField)
     val seasonFilter = if (season == null || season.isEmpty()) Filters.empty() else Filters.`in`(Fruit::season.name, season)
     val queryFilter = if (query == null) Filters.empty() else Filters.regex(Fruit::name.name, query, "i")
     val filter = Filters.and(seasonFilter, queryFilter)
-    val total = fruitCollection.countDocuments(filter)
-    val skip = (page - 1) * limit
+    val fruits = fruitCollection.find(filter).limit(limit).sort(sorting).toList()
 
-    val fruits = fruitCollection.find(filter).skip(skip).limit(limit).sort(sorting).toList()
-
-    return FruitPage(
-        fruits = fruits,
-        page = page,
-        total = total,
-        pageSize = limit,
-        totalPages = ceil(total.toDouble() / limit).toLong()
-    )
+    return fruits
 }
 
 suspend fun updateFruit(fruit: Fruit): Boolean{

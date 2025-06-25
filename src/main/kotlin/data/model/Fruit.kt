@@ -21,12 +21,3 @@ data class Fruit(
 enum class Season {
     SUMMER, WINTER, AUTUMN, SPRING, UNKNOWN
 }
-
-@Serializable
-data class FruitPage(
-    val fruits: List<Fruit>,
-    val page: Int,
-    val total: Long,
-    val pageSize: Int,
-    val totalPages: Long
-)
