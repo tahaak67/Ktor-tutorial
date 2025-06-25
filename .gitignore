@@ -1,0 +1,45 @@
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+/static/images/10add9e4-ac29-45b7-9445-98f969c8194e.jpg
+/static/images/30ef0519-3780-4d22-9cee-da2a884d42bc.jpg
+/static/images/43d83cfb-87a0-4fc6-a468-eadb5bce08ba.jpg
+/static/images/1411ac0b-4f0b-43d5-b224-e2ae05571220.jpg
+/static/images/b9f55ea4-37ef-4d59-ae01-08b1ff88825b.jpg
+/static/images/b23f9c4a-6408-4daf-880e-07ada08f49b4.jpeg
+/static/images/db035f86-99a6-45e5-a409-81a9c38801de.jpg
+/static/images/edc9204a-fcca-4883-8c93-76f1481f987b.jpg
+/static/images/ef350a9d-4371-4f64-841d-9179fcedd1db.jpeg
