@@ -155,4 +155,8 @@ fun Route.fruitRoutes() {
             call.respond(HttpStatusCode.OK, SimpleResponse(false, "Error can't delete fruit"))
         }
     }
+
+    get("/exception"){
+        throw Exception("This is a test")
+    }
 }
