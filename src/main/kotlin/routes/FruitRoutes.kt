@@ -16,6 +16,7 @@ import ly.com.tahaben.data.model.Season
 import ly.com.tahaben.data.model.SimpleResponse
 import ly.com.tahaben.utils.Constants
 import ly.com.tahaben.utils.save
+import ly.com.tahaben.validateAddNewFruitMultipart
 
 
 fun Route.fruitRoutes() {
@@ -70,8 +71,9 @@ fun Route.fruitRoutes() {
 
     authenticate("jwt") {
         post("/add-fruit") {
-            try {
+
                 val multipart = call.receiveMultipart()
+                validateAddNewFruitMultipart(multipart)
                 var name: String? = null
                 val countries = mutableListOf<String>()
                 var season: Season? = null
@@ -111,18 +113,12 @@ fun Route.fruitRoutes() {
                 } else {
                     call.respond(HttpStatusCode.BadRequest, SimpleResponse(isSuccess = false, message = "Cant add fruit"))
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                call.respond(
-                    HttpStatusCode.BadRequest,
-                    SimpleResponse(isSuccess = false, message = "Wrong fruit format please verify")
-                )
-            }
+
         }
     }
 
     patch("/add-fruit") {
-        try {
+
             val newFruit = call.receive<Fruit>()
 
             if (updateFruit(newFruit)) {
@@ -134,13 +130,7 @@ fun Route.fruitRoutes() {
                     SimpleResponse(isSuccess = false, message = "Cant update fruit")
                 )
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            call.respond(
-                HttpStatusCode.BadRequest,
-                SimpleResponse(isSuccess = false, message = "Wrong fruit format please verify")
-            )
-        }
+
     }
 
     delete("/delete-fruit/{id}") {

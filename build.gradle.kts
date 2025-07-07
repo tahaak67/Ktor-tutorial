@@ -32,6 +32,7 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
     implementation(libs.ktor.server.statusPages)
+    implementation(libs.ktor.server.requestValidation)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     // mongodb

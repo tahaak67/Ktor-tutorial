@@ -1,22 +1,18 @@
 package ly.com.tahaben
 
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
-import io.ktor.server.http.content.resolveResource
-import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.plugins.statuspages.StatusPagesConfig
-import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.http.content.*
+import io.ktor.server.plugins.requestvalidation.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
 import ly.com.tahaben.data.model.SimpleResponse
-import kotlin.text.contains
 
 
 fun Application.configureStatusPages(){
     install(StatusPages) {
         handleNotFound()
+        handleRequestValidationException()
         exception<Throwable> { call, cause ->
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
@@ -44,5 +40,11 @@ fun StatusPagesConfig.handleNotFound(){
             // respond with a json
             call.respond(code, SimpleResponse(false, "Sorry the page you're looking for is not found :("))
         }
+    }
+}
+
+fun StatusPagesConfig.handleRequestValidationException(){
+    exception<RequestValidationException> { call, cause ->
+        call.respond(cause.reasons)
     }
 }

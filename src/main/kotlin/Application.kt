@@ -13,4 +13,5 @@ fun Application.module() {
     configureSecurity()
     configureRouting()
     configureStatusPages()
+    configureRequestValidation()
 }
