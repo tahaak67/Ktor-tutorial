@@ -98,9 +98,8 @@ fun Route.fruitRoutes() {
                         else -> return@forEachPart call.respond(HttpStatusCode.BadRequest, SimpleResponse(false, "Invalid form item"))
                     }
                 }
-                if (name == null) return@post call.respond(HttpStatusCode.BadRequest, SimpleResponse(false, "Name field is required"))
-                if (season == null) return@post call.respond(HttpStatusCode.BadRequest, SimpleResponse(false, "Season field is required"))
-                val newFruit = Fruit(
+
+            val newFruit = Fruit(
                     name = name!!,
                     season = season!!,
                     countries = countries,

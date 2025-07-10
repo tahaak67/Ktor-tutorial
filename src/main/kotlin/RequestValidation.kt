@@ -1,9 +1,11 @@
 package ly.com.tahaben
 
+import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.requestvalidation.*
 import ly.com.tahaben.data.model.Fruit
+import ly.com.tahaben.data.model.Season
 
 fun Application.configureRequestValidation(){
     install(RequestValidation){
@@ -53,6 +55,8 @@ suspend fun validateAddNewFruitMultipart(multipart: MultiPartData){
     val errors = mutableListOf<String>()
     var name: String? = null
     val countries = mutableListOf<String>()
+    var season: Season? = null
+    var hasFile = false
 
     multipart.forEachPart { part ->
         when(part){
@@ -60,20 +64,45 @@ suspend fun validateAddNewFruitMultipart(multipart: MultiPartData){
                 when(part.name){
                     "name" -> name = part.value
                     "country" -> countries.add(part.value)
+                    "season" -> {
+                        println("validating season")
+                        try {
+                            season = Season.valueOf(part.value)
+                        }catch (e: IllegalArgumentException){
+                            e.printStackTrace()
+                            errors.add("Invalid season value ${part.value}")
+                        }
+
+                    }
                 }
             }
+            is PartData.FileItem -> {
+                if (part.name == "image"){
+                    hasFile = true
+                    val contentType = part.contentType
 
+
+                    if (contentType?.match(ContentType.Image.Any) != true) {
+                        errors.add("Only image files are allowed")
+                    }
+                }
+            }
             else -> Unit
         }
     }
 
     if (name?.isEmpty() == true){
-        errors.add("Name field is required")
+        errors.add("Field name is required")
     }
     if (countries.isEmpty()){
         errors.add("Fruit must have at least one country")
     }
-
+    if (season == null) {
+        errors.add("Field season is invalid")
+    }
+    if (!hasFile){
+        errors.add("Field image is required")
+    }
     if (errors.isNotEmpty()){
         throw RequestValidationException(reasons = errors, value = Unit)
     }
