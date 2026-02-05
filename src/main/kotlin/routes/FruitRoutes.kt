@@ -1,7 +1,6 @@
 package ly.com.tahaben.routes
 
 import io.ktor.http.*
-import io.ktor.http.content.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
@@ -14,8 +13,6 @@ import ly.com.tahaben.data.database.updateFruit
 import ly.com.tahaben.data.model.Fruit
 import ly.com.tahaben.data.model.Season
 import ly.com.tahaben.data.model.SimpleResponse
-import ly.com.tahaben.utils.Constants
-import ly.com.tahaben.utils.save
 import ly.com.tahaben.validateAddNewFruitMultipart
 
 
@@ -73,39 +70,12 @@ fun Route.fruitRoutes() {
         post("/add-fruit") {
 
                 val multipart = call.receiveMultipart()
-                validateAddNewFruitMultipart(multipart)
-                var name: String? = null
-                val countries = mutableListOf<String>()
-                var season: Season? = null
-                var imageUrl: String? = null
+                val fruit = validateAddNewFruitMultipart(multipart)
+
                 val addedBy = call.principal<JWTPrincipal>()?.get("username") ?: "Unknown"
 
-                multipart.forEachPart { part ->
-                    when(part){
-                        is PartData.FormItem -> {
-                            when(part.name){
-                                "name" -> name = part.value
-                                "country" -> countries.add(part.value)
-                                "season" -> season = Season.valueOf(part.value)
-                            }
-                        }
-                        is PartData.FileItem -> {
-                            if (part.name == "image"){
-                                val imageName = part.save(Constants.STATIC_FRUIT_IMAGE_PATH)
-                                imageUrl = Constants.EXTERNAL_IMAGE_PATH + "/" + imageName
-                            }
-                        }
-                        else -> return@forEachPart call.respond(HttpStatusCode.BadRequest, SimpleResponse(false, "Invalid form item"))
-                    }
-                }
 
-            val newFruit = Fruit(
-                    name = name!!,
-                    season = season!!,
-                    countries = countries,
-                    imageUrl = imageUrl,
-                    addedBy = addedBy
-                )
+            val newFruit = fruit.copy(addedBy = addedBy)
                 if (addFruit(newFruit)) {
 
                     call.respond(HttpStatusCode.Created, newFruit)

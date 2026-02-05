@@ -6,6 +6,8 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.requestvalidation.*
 import ly.com.tahaben.data.model.Fruit
 import ly.com.tahaben.data.model.Season
+import ly.com.tahaben.utils.Constants
+import ly.com.tahaben.utils.save
 
 fun Application.configureRequestValidation(){
     install(RequestValidation){
@@ -50,13 +52,14 @@ fun RequestValidationConfig.validateFruitBody(){
     }
 }
 
-suspend fun validateAddNewFruitMultipart(multipart: MultiPartData){
+suspend fun validateAddNewFruitMultipart(multipart: MultiPartData): Fruit{
 
     val errors = mutableListOf<String>()
     var name: String? = null
     val countries = mutableListOf<String>()
     var season: Season? = null
     var hasFile = false
+    var imageUrl: String? = null
 
     multipart.forEachPart { part ->
         when(part){
@@ -84,6 +87,9 @@ suspend fun validateAddNewFruitMultipart(multipart: MultiPartData){
 
                     if (contentType?.match(ContentType.Image.Any) != true) {
                         errors.add("Only image files are allowed")
+                    } else {
+                        val imageName = part.save(Constants.STATIC_FRUIT_IMAGE_PATH)
+                        imageUrl = Constants.EXTERNAL_IMAGE_PATH + "/" + imageName
                     }
                 }
             }
@@ -106,5 +112,5 @@ suspend fun validateAddNewFruitMultipart(multipart: MultiPartData){
     if (errors.isNotEmpty()){
         throw RequestValidationException(reasons = errors, value = Unit)
     }
-
+    return Fruit(name = name!!, countries = countries, season = season!!, imageUrl = imageUrl, addedBy = "Unknown")
 }
