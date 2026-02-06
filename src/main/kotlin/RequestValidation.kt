@@ -4,10 +4,12 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.requestvalidation.*
+import io.ktor.server.routing.*
 import ly.com.tahaben.data.model.Fruit
 import ly.com.tahaben.data.model.Season
 import ly.com.tahaben.utils.Constants
 import ly.com.tahaben.utils.save
+import ly.com.tahaben.utils.translate
 
 fun Application.configureRequestValidation(){
     install(RequestValidation){
@@ -52,7 +54,7 @@ fun RequestValidationConfig.validateFruitBody(){
     }
 }
 
-suspend fun validateAddNewFruitMultipart(multipart: MultiPartData): Fruit{
+suspend fun RoutingContext.validateAddNewFruitMultipart(multipart: MultiPartData): Fruit{
 
     val errors = mutableListOf<String>()
     var name: String? = null
@@ -98,7 +100,7 @@ suspend fun validateAddNewFruitMultipart(multipart: MultiPartData): Fruit{
     }
 
     if (name?.isEmpty() == true){
-        errors.add("Field name is required")
+        errors.add(translate("error.field.required", "Name"))
     }
     if (countries.isEmpty()){
         errors.add("Fruit must have at least one country")
